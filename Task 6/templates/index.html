@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Object Counter</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; }
+        .result-img { max-width: 500px; margin-top: 20px; border: 2px solid #333; }
+    </style>
+</head>
+<body>
+    <h2>AI Object Counter (Lab 6)</h2>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="image" required>
+        <button type="submit">Upload & Count</button>
+    </form>
+
+    {% if count is defined %}
+        <h3>Objects Detected: {{ count }}</h3>
+        <img src="{{ url_for('static', filename='uploads/' + image) }}" class="result-img">
+    {% endif %}
+</body>
+</html>
