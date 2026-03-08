@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ha! - Joke Generator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container-main {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.6s ease;
+        }
+
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        .header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .card-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 45px 35px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease;
+            transition: all 0.3s ease;
+        }
+
+        .card-container:hover {
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+            transform: translateY(-5px);
+        }
+
+        .joke-counter {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .joke-counter span {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .joke-display {
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        #setup {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        #punchline {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
+            line-height: 1.6;
+            opacity: 0;
+            animation: slideInPunchline 0.8s ease forwards 0.3s;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 35px;
+        }
+
+        .btn-joke {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-joke:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #764ba2, #f093fb);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn-joke:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
+            left: 0;
+        }
+
+        .btn-joke:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-joke.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-copy {
+            background: #f0f0f0;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .btn-copy:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        .copy-feedback {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            animation: slideInRight 0.4s ease, slideOutRight 0.4s ease 2s forwards;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInPunchline {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .card-container {
+                padding: 30px 20px;
+            }
+
+            #setup {
+                font-size: 1.2rem;
+            }
+
+            #punchline {
+                font-size: 1.1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-main">
+        <div class="header">
+            <div class="logo">😂</div>
+            <h1>Ha!</h1>
+            <p class="tagline">One laugh a time</p>
+        </div>
+
+        <div class="card-container">
+            <div class="joke-counter">
+                <span id="jokesCount">0</span> jokes told today
+            </div>
+
+            <div class="joke-display">
+                <p id="setup">👋 Click "Get Joke" to start laughing!</p>
+                <p id="punchline"></p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-joke" onclick="fetchJoke()" id="jokeBtn">Get Joke</button>
+                <button class="btn-copy" onclick="copyJoke()" id="copyBtn" style="display: none;">📋 Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let jokeCount = 0;
+        let currentJoke = { setup: '', punchline: '' };
+
+        async function fetchJoke() {
+            const btn = document.getElementById('jokeBtn');
+            const setup = document.getElementById('setup');
+            const punchline = document.getElementById('punchline');
+            const copyBtn = document.getElementById('copyBtn');
+
+            btn.classList.add('loading');
+            btn.innerHTML = '<div class="loading-spinner"></div>Loading...';
+            copyBtn.style.display = 'none';
+
+            try {
+                const response = await fetch('/joke');
+                const data = await response.json();
+
+                currentJoke = data;
+                jokeCount++;
+                document.getElementById('jokesCount').textContent = jokeCount;
+
+                // Reset animations
+                setup.style.animation = 'none';
+                punchline.style.animation = 'none';
+
+                setTimeout(() => {
+                    setup.textContent = data.setup;
+                    punchline.textContent = data.punchline;
+
+                    setup.style.animation = 'fadeIn 0.8s ease forwards';
+                    punchline.style.animation = 'slideInPunchline 0.8s ease forwards 0.3s';
+
+                    copyBtn.style.display = 'block';
+                }, 50);
+            } catch (error) {
+                setup.textContent = '😅 Oops! Failed to fetch a joke.';
+                punchline.textContent = 'Try again in a moment!';
+            } finally {
+                btn.classList.remove('loading');
+                btn.innerHTML = 'Get Joke';
+            }
+        }
+
+        function copyJoke() {
+            const jokeText = currentJoke.setup + ' ' + currentJoke.punchline;
+            navigator.clipboard.writeText(jokeText).then(() => {
+                // Show feedback
+                const feedback = document.createElement('div');
+                feedback.className = 'copy-feedback';
+                feedback.textContent = '✓ Copied to clipboard!';
+                document.body.appendChild(feedback);
+                setTimeout(() => feedback.remove(), 2500);
+            });
+        }
+
+        // Fetch a joke on page load
+        window.addEventListener('load', () => {
+            setTimeout(fetchJoke, 300);
+        });
+    </script>
+
+</body>
+</html>
