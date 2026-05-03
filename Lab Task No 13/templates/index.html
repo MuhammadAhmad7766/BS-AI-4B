@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Interview Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="app-wrapper">
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🧠</span>
+      <span class="logo-text">InterviewAI</span>
+    </div>
+    <span class="badge">Beta</span>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Question Card -->
+    <div class="question-card">
+      <div class="question-label">Interview Question</div>
+      <p class="question-text" id="questionText">{{ question }}</p>
+      <button class="btn-ghost" onclick="getNewQuestion()">🔄 New Question</button>
+    </div>
+
+    <!-- Video Preview -->
+    <div class="video-section">
+      <div class="video-container">
+        <video id="videoPreview" autoplay muted playsinline></video>
+        <div class="video-overlay" id="videoOverlay">
+          <span>📷 Camera Off</span>
+        </div>
+        <div class="recording-indicator" id="recIndicator">
+          <span class="rec-dot"></span> Recording...
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button class="btn-primary" id="startBtn" onclick="startRecording()">
+          🎙️ Start Recording
+        </button>
+        <button class="btn-danger hidden" id="stopBtn" onclick="stopRecording()">
+          ⏹️ Stop & Analyze
+        </button>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-bar" id="statusBar">
+      <span>Press "Start Recording" to begin your answer</span>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer" id="timer">00:00</div>
+
+  </main>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay hidden" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p class="loading-text" id="loadingText">Analyzing your performance...</p>
+      <div class="loading-steps">
+        <div class="step" id="step1">🎭 Detecting facial expressions</div>
+        <div class="step" id="step2">🗣️ Transcribing your answer</div>
+        <div class="step" id="step3">🤖 AI evaluating answer quality</div>
+        <div class="step" id="step4">📊 Calculating final score</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/recorder.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+flask
+flask-cors
+opencv-python
+deepface
+anthropic
+python-dotenv
+SpeechRecognition
+pydub
+numpy
+ 

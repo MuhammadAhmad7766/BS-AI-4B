@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Results — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="dashboard-page">
+
+<div class="app-wrapper">
+
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🧠</span>
+      <span class="logo-text">InterviewAI</span>
+    </div>
+    <a href="/" class="btn-ghost">← Try Again</a>
+  </header>
+
+  <main class="dashboard-main" id="dashboardContent">
+    
+    <!-- Score Hero -->
+    <section class="score-hero">
+      <div class="score-ring-wrapper">
+        <svg class="score-ring" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#1a1a2e" stroke-width="8"/>
+          <circle cx="60" cy="60" r="54" fill="none" stroke="url(#grad)" stroke-width="8"
+                  stroke-dasharray="339" stroke-dashoffset="339"
+                  stroke-linecap="round" id="scoreCircle" transform="rotate(-90 60 60)"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#7c3aed"/>
+              <stop offset="100%" style="stop-color:#06b6d4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="score-center">
+          <span class="score-number" id="scoreNumber">0</span>
+          <span class="score-label">/ 100</span>
+        </div>
+      </div>
+      <div class="score-meta">
+        <h1 class="score-title" id="scoreTitle">Calculating...</h1>
+        <p class="score-subtitle" id="scoreSubtitle">Your interview performance report</p>
+      </div>
+    </section>
+
+    <!-- Question & Transcript -->
+    <section class="card">
+      <h2 class="card-title">📋 Question Asked</h2>
+      <p class="card-text" id="questionDisplay">—</p>
+      <h2 class="card-title mt">🗣️ Your Answer (Transcribed)</h2>
+      <p class="card-text transcript" id="transcriptDisplay">—</p>
+    </section>
+
+    <!-- Two Column Grid -->
+    <div class="two-col">
+
+      <!-- Face Analysis -->
+      <section class="card">
+        <h2 class="card-title">🎭 Face Confidence</h2>
+        <div class="mini-score" id="faceScore">—</div>
+        <p class="card-text">Dominant Emotion: <strong id="dominantEmotion">—</strong></p>
+        <ul class="tips-list" id="faceTips"></ul>
+      </section>
+
+      <!-- AI Score -->
+      <section class="card">
+        <h2 class="card-title">🤖 Answer Quality</h2>
+        <div class="mini-score" id="aiScore">—</div>
+        <p class="card-text" id="aiFeedback">—</p>
+      </section>
+
+    </div>
+
+    <!-- Strengths -->
+    <section class="card">
+      <h2 class="card-title">✅ Your Strengths</h2>
+      <ul class="tips-list green" id="strengthsList"></ul>
+    </section>
+
+    <!-- Improvements -->
+    <section class="card">
+      <h2 class="card-title">🔧 Areas to Improve</h2>
+      <ul class="tips-list orange" id="improvementsList"></ul>
+    </section>
+
+    <!-- Model Answer Hint -->
+    <section class="card hint-card">
+      <h2 class="card-title">💡 Ideal Answer Hint</h2>
+      <p class="card-text hint-text" id="modelHint">—</p>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-row">
+      <a href="/" class="btn-primary">🔄 Practice Again</a>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Results localStorage se load karo (recorder.js ne store kiya tha)
+  const results = JSON.parse(localStorage.getItem('interviewResults') || '{}');
+
+  if (!results.final_score) {
+    document.getElementById('dashboardContent').innerHTML = 
+      '<p style="text-align:center;padding:60px;color:#888">No results found. <a href="/">Start an interview</a></p>';
+  } else {
+    populateDashboard(results);
+  }
+
+  function populateDashboard(data) {
+    const score = data.final_score;
+    
+    // Animated score counter
+    animateScore(score);
+    
+    // Score title
+    let title = score >= 80 ? '🌟 Excellent Performance!' : 
+                score >= 60 ? '👍 Good Effort!' : 
+                score >= 40 ? '📈 Keep Practicing!' : '💪 You Can Improve!';
+    document.getElementById('scoreTitle').textContent = title;
+    document.getElementById('scoreSubtitle').textContent = 
+      `Face: ${data.face?.confidence_score ?? '--'}% | Answer: ${data.ai?.score ?? '--'}%`;
+
+    // Question & transcript
+    document.getElementById('questionDisplay').textContent = data.question || '—';
+    document.getElementById('transcriptDisplay').textContent = data.transcript || '—';
+
+    // Face analysis
+    document.getElementById('faceScore').textContent = (data.face?.confidence_score ?? '--') + '%';
+    document.getElementById('dominantEmotion').textContent = data.face?.dominant_emotion || '—';
+    const faceTips = document.getElementById('faceTips');
+    (data.face?.tips || []).forEach(tip => {
+      const li = document.createElement('li');
+      li.textContent = tip;
+      faceTips.appendChild(li);
+    });
+
+    // AI analysis
+    document.getElementById('aiScore').textContent = (data.ai?.score ?? '--') + '%';
+    document.getElementById('aiFeedback').textContent = data.ai?.overall_feedback || '—';
+
+    // Strengths
+    const sl = document.getElementById('strengthsList');
+    (data.ai?.strengths || []).forEach(s => {
+      const li = document.createElement('li');
+      li.textContent = s;
+      sl.appendChild(li);
+    });
+
+    // Improvements
+    const il = document.getElementById('improvementsList');
+    (data.ai?.improvements || []).forEach(i => {
+      const li = document.createElement('li');
+      li.textContent = i;
+      il.appendChild(li);
+    });
+
+    // Model hint
+    document.getElementById('modelHint').textContent = data.ai?.model_answer_hint || '—';
+  }
+
+  function animateScore(target) {
+    const numEl = document.getElementById('scoreNumber');
+    const circle = document.getElementById('scoreCircle');
+    const circumference = 339;
+    let current = 0;
+    const step = target / 60;
+    
+    const interval = setInterval(() => {
+      current = Math.min(current + step, target);
+      numEl.textContent = Math.round(current);
+      const offset = circumference - (current / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      if (current >= target) clearInterval(interval);
+    }, 16);
+  }
+</script>
+</body>
+</html>
