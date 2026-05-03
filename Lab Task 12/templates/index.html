@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Little Library Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            ✨ The Little Library ✨
+        </div>
+        <div id="chat-box" class="chat-box">
+            <div class="msg bot">
+                <b>Assistant:</b> Greetings, traveler! 📖 How may I help you navigate our shelves today?
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Display user message
+            chatBox.innerHTML += `<div class="msg user">${message}</div>`;
+            input.value = '';
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Display bot message with a slight "thinking" delay for charm
+                setTimeout(() => {
+                    chatBox.innerHTML += `
+                        <div class="msg bot">
+                            <b>Assistant:</b> ${data.reply}
+                        </div>`;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 400);
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+    </script>
+</body>
+</html>
